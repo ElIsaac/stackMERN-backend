@@ -33,8 +33,8 @@ usuarioSchema.methods.encriptar = async contrasenia =>{
     return await bcrypt.hash(contrasenia, salt);
 }
 
-usuarioSchema.methods.matchPassword = async contrasenia =>{
+usuarioSchema.methods.matchPassword =  async function(contrasenia) {
     return await bcrypt.compare(contrasenia, this.contrasenia);
-}
+  };
 
 module.exports =mongoose.model("Usuario", usuarioSchema);
