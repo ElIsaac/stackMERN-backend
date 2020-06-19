@@ -1,10 +1,12 @@
 const express=require('express')
 const controladorUsuario=require('../controllers/usuario');
+const isAuthenticated = require('../middlewares/authentication')
 
-api=express.Router();
+router=express.Router();
 
-api.post("/registrate", controladorUsuario.registrate);
-api.post("/inicia-sesion", controladorUsuario.iniciaSesion);
+router.post("/registrate", controladorUsuario.registrate);
+router.post("/inicia-sesion", controladorUsuario.iniciaSesion);
+router.get("/usuarios",[isAuthenticated.auth], controladorUsuario.traerUsuarios);
 
-module.exports = api;
+module.exports = router;
 

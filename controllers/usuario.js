@@ -57,7 +57,21 @@ async function iniciaSesion(req, res){
         res.status(500).json({ mensaje: "no se pudo iniciar     "+e });
     }
 }
+
+async function traerUsuarios(req, res){
+    try {
+        const usuarios = await Usuario.find();
+        if(!usuarios){
+            res.status(404).json({"mensaje":"Aun no hay usuarios"})
+        }
+        res.status(200).json(usuarios)
+    } catch (error) {
+        res.status(400).json({"mensaje":"Error del servidor. "+error})
+    }
+}
+
 module.exports ={
     registrate,
-    iniciaSesion
+    iniciaSesion,
+    traerUsuarios
 };
