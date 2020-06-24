@@ -1,7 +1,9 @@
-
+const fs = require('fs')
+const path = require('path')
 const Usuario = require('../models/Usuario');
 const passport=require('passport');
-const jwt =require('../services/jwt')
+const jwt =require('../services/jwt');
+const { exists } = require('../models/Usuario');
 
 async function registrate(req, res){
     const {nombre, apellidos, email, contrasenia, confirmaContrasenia, rol, activo}=req.body;
@@ -70,8 +72,107 @@ async function traerUsuarios(req, res){
     }
 }
 
+async function traerUsuariosActivos(req, res){
+    const query = req.query;
+    try {
+        const usuarios = await Usuario.find({ activo: query.activo });
+        if(!usuarios){
+            res.status(404).json({"mensaje":"Aun no hay usuarios"})
+        }
+        res.status(200).json(usuarios)
+    } catch (error) {
+        res.status(400).json({"mensaje":"Error del servidor. "+error})
+    }
+}
+async function borrarUsuarios(req,res){
+    const id = req.params.id
+    try {
+        const eliminar = await Usuario.findByIdAndDelete(id)
+        if(!eliminar){
+            res.status(400).json({"mensaje":"El usuario no existe"})
+        }
+        
+        res.status(200).json({"mensaje":"Usuario Eliminado"})
+    } catch (error) {
+        res.status(400).json({"mensaje":"Error del servidor. "+error})
+    }
+}
+
+async function uploadAvatar(req, res){
+    const {id} = req.params
+    try{
+        const usuario=await Usuario.findById(id)
+         if(!usuario){
+            res.status(404).json({"mensaje": "Usuario no encontrado"})
+        } 
+        let datosUsuario=usuario;
+        if(req.files){
+            let filePath = req.files.avatar.path;
+            let fileSplit = filePath.split('\\');
+            let fileName = fileSplit[2];
+
+            let extSplit = fileName.split("."); 
+            let extName = extSplit[1].toLowerCase() 
+
+            if( extName=== "png" || extName=== "jpg" ){
+                usuario.avatar = fileName
+                try{
+                    const usuarioActualizado = await Usuario.findByIdAndUpdate({_id: id}, usuario)
+                    if(!usuarioActualizado){
+                        res.status(404).json({mensaje: "Usuario no encontrado"})
+                    }else{
+                        res.status(200).json({avatarName: fileName})
+                    }
+                }catch(err){
+                    res.status(500).json({mensaje: "error del servidor"})
+                }
+                
+                res.send('ok')
+            }else{
+                res.status(400).json({mensaje: "Solo puede subir imagenes jpg y png"})
+            }
+        }
+    }catch(err){
+        res.json({mensaje: "Error del servidor"+err}).status(500);
+    }
+}
+
+function getAvatar(req, res){
+    const avatarName = req.params.avatarName;
+    const filePath = "./uploads/avatar/"+avatarName;
+
+    fs.exists(filePath, exists =>{
+        if(!exists){
+            res.status(404).json({mensaje: "el avatar no existe"})
+        }else{
+            res.sendFile(path.resolve(filePath))
+        }
+    })
+}
+
+async function updateUser(req, res){
+    const userData=req.body;
+    const id = req.params.id;
+    try{
+        const usuarioActualizado = await Usuario.findByIdAndUpdate({_id: id}, userData)
+        if(!usuarioActualizado){
+            res.status(404).json({mensaje: "No se ha encontrado el usuario "})
+
+        }
+        res.status(200).json({mensaje: "Usuario Actualizado"})
+    }catch(err){
+        res.status(500).json({mensaje: "Error del servidor "+err})
+    }
+
+}
+
 module.exports ={
     registrate,
     iniciaSesion,
-    traerUsuarios
+    traerUsuarios,
+    traerUsuariosActivos,
+    borrarUsuarios,
+    uploadAvatar,
+    getAvatar,
+    updateUser
 };

@@ -25,7 +25,8 @@ const usuarioSchema = Schema({
         type: String,
         required: true
     },
-    activo: Boolean
+    activo: Boolean,
+    avatar: String
 })
 
 usuarioSchema.methods.encriptar = async contrasenia =>{
