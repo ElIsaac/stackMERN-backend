@@ -7,6 +7,7 @@ const md_upload_avatar= multipart({uploadDir: "./uploads/avatar"})
 router=express.Router();
 
 router.post("/registrate", controladorUsuario.registrate);
+router.post("/registrate/administrador", controladorUsuario.registrarAdmin);
 router.post("/inicia-sesion", controladorUsuario.iniciaSesion);
 
 router.get("/usuarios",[md_isAuthenticated.auth], controladorUsuario.traerUsuarios);

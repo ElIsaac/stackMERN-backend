@@ -5,31 +5,39 @@ const passport=require('passport');
 const jwt =require('../services/jwt');
 const { exists } = require('../models/Usuario');
 
-async function registrate(req, res){
+async function registrarGeneral(req, res, activoVar){
     const {nombre, apellidos, email, contrasenia, confirmaContrasenia, rol, activo}=req.body;
     try{
-        if(nombre===""|| apellidos===""|| email===""|| contrasenia ===""|| confirmaContrasenia ===""){
+        if(nombre===""|| apellidos===""|| email===""|| contrasenia ===""|| confirmaContrasenia ==="" || !confirmaContrasenia ){
             res.json({"mensaje":"tiene que llenar todos los campos"})
         }
         if(contrasenia!==confirmaContrasenia){
-            res.json({"mensaje":"sus contrasenias son diferentes"})
+            res.json({"mensaje":"sus contrasenias son diferentes"}).status(400)
         }
         if(contrasenia.length < 4){
-            res.json({"mensaje":"la contraseña debe de ser mayor a 4 caracteres"})
+            res.json({"mensaje":"la contraseña debe de ser mayor a 4 caracteres"}).status(400)
         }
         const nuevoUsuario=new Usuario({
             nombre:nombre,
              apellidos:apellidos,
              email:email.toLowerCase(),
              rol:"admin",
-             activo:false
+             activo:activoVar
         })
         nuevoUsuario.contrasenia = await nuevoUsuario.encriptar(contrasenia)
         await nuevoUsuario.save()
         res.status(200).json({"mensaje": "usuario guardado"})
     }catch(err){
-        res.status(400).json({"mensaje": "Ese email actualmente ya esta en uso"})
+        res.status(400).json({"mensaje": "Error: Algo ha ocurrido en el servidor"+err})
     }
+}
+
+async function registrate(req, res){
+    registrarGeneral(req, res, false)
+}
+
+async function registrarAdmin(req, res){
+    registrarGeneral(req, res, true)
 }
 
 async function iniciaSesion(req, res){
@@ -211,5 +219,6 @@ module.exports ={
     uploadAvatar,
     getAvatar,
     updateUser,
-    activateUser
+    activateUser,
+    registrarAdmin
 };
