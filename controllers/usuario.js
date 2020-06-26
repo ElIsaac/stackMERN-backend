@@ -109,12 +109,6 @@ async function borrarUsuarios(req,res){
 
 async function uploadAvatar(req, res){
     const {id} = req.params
-    try{
-        const usuario=await Usuario.findById(id)
-         if(!usuario){
-            res.status(404).json({"mensaje": "Usuario no encontrado"})
-        } 
-        let datosUsuario=usuario;
         if(req.files){
             let filePath = req.files.avatar.path;
             let fileSplit = filePath.split('\\');
@@ -124,26 +118,26 @@ async function uploadAvatar(req, res){
             let extName = extSplit[1].toLowerCase() 
 
             if( extName=== "png" || extName=== "jpg" ){
-                usuario.avatar = fileName
+                
+                const avatar={
+                    avatar: fileName
+                }
                 try{
-                    const usuarioActualizado = await Usuario.findByIdAndUpdate({_id: id}, usuario)
+                    const usuarioActualizado = await Usuario.findByIdAndUpdate({_id: id}, avatar)
                     if(!usuarioActualizado){
                         res.status(404).json({mensaje: "Usuario no encontrado"})
                     }else{
                         res.status(200).json({avatarName: fileName})
                     }
                 }catch(err){
-                    res.status(500).json({mensaje: "error del servidor"})
+                    res.status(500).json({mensaje: "error del servidor"+err})
                 }
                 
-                res.send('ok')
             }else{
                 res.status(400).json({mensaje: "Solo puede subir imagenes jpg y png"})
             }
-        }
-    }catch(err){
-        res.json({mensaje: "Error del servidor"+err}).status(500);
-    }
+        } 
+    
 }
 
 function getAvatar(req, res){
