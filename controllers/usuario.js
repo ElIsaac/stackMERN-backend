@@ -14,7 +14,7 @@ async function registrate(req, res){
         if(contrasenia!==confirmaContrasenia){
             res.json({"mensaje":"sus contrasenias son diferentes"})
         }
-        if(contrasenia.length <= 4){
+        if(contrasenia.length < 4){
             res.json({"mensaje":"la contraseña debe de ser mayor a 4 caracteres"})
         }
         const nuevoUsuario=new Usuario({
@@ -93,6 +93,7 @@ async function borrarUsuarios(req,res){
         }
         
         res.status(200).json({"mensaje":"Usuario Eliminado"})
+        console.log(eliminar)
     } catch (error) {
         res.status(400).json({"mensaje":"Error del servidor. "+error})
     }
@@ -151,20 +152,55 @@ function getAvatar(req, res){
 }
 
 async function updateUser(req, res){
-    const userData=req.body;
+    let userData=req.body;
+    userData.email=req.body.email.toLowerCase();
     const id = req.params.id;
     try{
+        if(req.body.contrasenia && req.body.confirmaContrasenia){
+            if(req.body.contrasenia !== req.body.confirmaContrasenia){
+                return res.status(400).json({mensaje: "Error: Las contraseñas no coinciden"})
+            }
+            if(req.body.contrasenia.length<4){
+                return res.status(400).json({mensaje: "Error: La contraseña debe de ser mayor a 4 caracteres"})
+            }
+            const usuarioMethods = new Usuario();
+            userData.contrasenia = await usuarioMethods.encriptar(req.body.contrasenia)
+        }
+        
         const usuarioActualizado = await Usuario.findByIdAndUpdate({_id: id}, userData)
         if(!usuarioActualizado){
-            res.status(404).json({mensaje: "No se ha encontrado el usuario "})
+            res.status(404).json({mensaje: "Error: No se ha encontrado el usuario "})
 
         }
         res.status(200).json({mensaje: "Usuario Actualizado"})
     }catch(err){
-        res.status(500).json({mensaje: "Error del servidor "+err})
+        res.status(500).json({mensaje: "Error: Algo ha ocurrido en el servidor. "+err})
     }
 
 }
+
+async function activateUser(req, res){
+    const id = req.params.id;
+    try{
+        const usuarioActualizado = await Usuario.findByIdAndUpdate({_id: id}, {activo:req.body.activo})
+        if(!usuarioActualizado){
+            res.status(404).json({mensaje: "Error: No se ha encontrado el usuario. "})
+        }
+        let estado
+        if(req.body.activo==false){
+            estado = "desactivado"
+        }else{
+            estado="activado"
+        }
+        res.status(200).json({mensaje: "Usuario "+estado+" correctamente"})
+        console.log(usuarioActualizado)
+    }catch(err){
+        res.status(500).json({mensaje: "Error: Algo ha ocurrido en el servidor. "+err})
+        console.log(err)
+    }
+}
+
+
 
 module.exports ={
     registrate,
@@ -174,5 +210,6 @@ module.exports ={
     borrarUsuarios,
     uploadAvatar,
     getAvatar,
-    updateUser
+    updateUser,
+    activateUser
 };

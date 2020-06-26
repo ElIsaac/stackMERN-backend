@@ -13,11 +13,11 @@ router.get("/usuarios",[md_isAuthenticated.auth], controladorUsuario.traerUsuari
 router.get("/usuarios-activos",[md_isAuthenticated.auth], controladorUsuario.traerUsuariosActivos);
 router.get("/traer-avatar/:avatarName", controladorUsuario.getAvatar)
 
-router.delete("/usuarios/:id", [md_isAuthenticated.auth], controladorUsuario.borrarUsuarios);
+router.delete("/borrar-usuario/:id", [md_isAuthenticated.auth], controladorUsuario.borrarUsuarios);
 
 router.put("/actualizar-usuario/:id", [md_isAuthenticated.auth], controladorUsuario.updateUser);
 router.put("/subir-avatar/:id", [md_isAuthenticated.auth, md_upload_avatar], controladorUsuario.uploadAvatar)
-
+router.put("/autorizar/:id", [md_isAuthenticated.auth], controladorUsuario.activateUser)
 
 module.exports = router;
 
