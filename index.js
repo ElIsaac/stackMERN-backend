@@ -14,7 +14,7 @@ app.use(cors());
 //carga de rutas
 const rutasUsuarios = require('./routes/usuarios')
 const rutasAuth = require('./routes/auth')
-
+const rutasMenu = require('./routes/menu')
 
 //configuracion
 app.set('port', process.env.PORT || 4000);
@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 
 app.use(`/api/${API_VERSION}/`,rutasUsuarios);
 app.use(`/api/${API_VERSION}/`,rutasAuth);
-
+app.use(`/api/${API_VERSION}/`,rutasMenu);
 
 
 //router basic
