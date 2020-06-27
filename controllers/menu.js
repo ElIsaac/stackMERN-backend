@@ -1,5 +1,21 @@
 const Menu = require("../models/Menu")
 
+async function actualizarMenu(req,res){
+    let id=req.params.id;
+    try{
+        
+        const resultado=await Menu.findByIdAndUpdate(id, req.body)
+        if(!resultado){
+            res.status(400).json({mensaje: "Error: no se encontrado el menu con ese id"})
+        }else{
+            res.status(200).json({mensaje: "Menu actualizado corrrectamente"})
+        }
+    }catch(err){
+        res.status(500).json({mensaje:"Error del servidor. "+err.message})
+    }
+}
+
+
 async function agregarMenu(req,res){
     try{
         const menu = new Menu(req.body)
@@ -30,5 +46,6 @@ async function traerMenu(req,res){
 
 module.exports ={
     traerMenu,
-    agregarMenu
+    agregarMenu,
+    actualizarMenu
 }
